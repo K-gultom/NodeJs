@@ -4,12 +4,15 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "dev": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "kelompok 2",
   "license": "ISC",
   "dependencies": {
     "express": "^4.18.2",
-    "joi": "^17.11.0"
+    "joi": "^17.11.0",
+    "mysql": "^2.18.1",
+    "nodemon": "^3.0.2"
   }
 }

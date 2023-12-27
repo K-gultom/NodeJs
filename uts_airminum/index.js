@@ -1,59 +1,50 @@
 const express = require('express')
 const Joi = require('joi')
+// const { createConnection } = require('mysql')
 const app = express()
+const mysql = require('mysql')
 
 app.use(express.json())
 app.use(express.urlencoded({extended: false}))
 
+const Connection = mysql.createConnection({
+    host	: 'localhost',
+	user	: 'root',
+	password	: '',
+	database	: 'db_airminum',
+})
+
+Connection.connect((err)=>{
+	if (err) throw err
+})
 
 
-var airminum = [{
-    id: '01',
-    category: 'Gelas/Cup',
-    produk: 'Aqua 220 ml',
-    satuan: 'Dus',
-    harga: '37.000',
-    dataSupplier: {
-        idSupplier: '01',
-        supplier: 'PT. Angsa Dua',
-        alamatSupplier: 'Jl. Sukabangun',
-        telpSupplier: '082199890989',
-    },
-},{
-    id: '02',
-    category: 'Botol',
-    produk: 'Le Minerale 450 ml',
-    satuan: 'Dus',
-    harga: '48.000',
-    dataSupplier: {
-        idSupplier: '02',
-        supplier: 'PT. Nia Maraya',
-        alamatSupplier: 'Jl. Pegunungan Bukit',
-        telpSupplier: '083376236789',
-    },
-},{
-    id: '03',
-    category: 'Botol',
-    produk: 'Cleo Water Mineral 450 ml',
-    satuan: 'Dus',
-    harga: '51.000',
-    dataSupplier: {
-        idSupplier: '03',
-        supplier: 'PT. Mayang Gemilang Jaya',
-        alamatSupplier: 'Jl. 16 Ilir Palembang',
-        telpSupplier: '089176234566',
-    },
-}]
+// var airminum = [{
+//     id: '01',
+//     category: 'Gelas/Cup',
+//     produk: 'Aqua 220 ml',
+//     satuan: 'Dus',
+//     harga: '37.000',
+//     supplier: 'PT. Angsa Dua',
+//     alamatSupplier: 'Jl. Sukabangun',
+//     telpSupplier: '082199890989',
+// }]
 
 
 
     app.get('/api/airminum', (req, res)=>{
-        const result = {
-            status: true,
-            data: airminum
-        }
-
-        res.send(result)
+        connection.query('SELECT * FROM produk', (e, r)=>{
+			if (e) {
+				return res.status(500).send({
+					status: false,
+					message: 'Internal Server Error!!!'
+				})
+			}
+			res.status(200).send({
+				status: true,
+				data: r,
+			})
+		})
     })
 
     app.get('/api/airminum/:id', (req, res)=> {
@@ -86,12 +77,9 @@ var airminum = [{
             produk: Joi.string().required(),
             satuan: Joi.string().required(),
             harga: Joi.number().required(),
-            dataSupplier:{
-                idSupplier: Joi.string().min(2).required(),
-                supplier: Joi.string().required(),
-                alamatSupplier: Joi.string().required(),
-                telpSupplier: Joi.string().required(),
-            }
+            supplier: Joi.string().required(),
+            alamatsuplier: Joi.string().required(),
+            telpsuplier: Joi.string().required(),
         })
 
         const {error} = schema.validate({
@@ -100,38 +88,65 @@ var airminum = [{
             produk: req.body.produk,
             satuan: req.body.satuan,
             harga: req.body.harga,
-            dataSupplier:{
-                idSupplier: req.body.idSupplier,
-                supplier: req.body.supplier,
-                alamatSupplier: req.body.alamatSupplier,
-                telpSupplier: req.body.telpSupplier,
-            }
+            supplier: req.body.supplier,
+            alamatsuplier: req.body.alamatsuplier,
+            telpsuplier: req.body.telpSupplier,
         })
 
-        if(error){
+        if (error) {
             return res
-
-            .status(400)
-            .send({ststus: false, message: error.details[0].message})
+                    .status(400)
+                    .send({status:false, message: error.details[0].message})
         }
 
-        const tempAirminum = {
-            id: req.body.id,
-            category: req.body.category,
-            produk: req.body.produk,
-            satuan: req.body.satuan,
-            harga: req.body.harga,
-            dataSupplier:{
-                idSupplier: req.body.idSupplier,
-                supplier: req.body.supplier,
-                alamatSupplier: req.body.alamatSupplier,
-                telpSupplier: req.body.telpSupplier,
+        // save data
+        const fid = req.body.id,
+        const fcategory= req.body.category,
+        const fproduk = req.body.produk,
+        const fsatuan = req.body.satuan,
+        const fharga = req.body.harga,
+        const fnamasupplier = req.body.supplier,
+        const falamatsuplier = req.body.alamatsuplier,
+        const ftelpsuplier = req.body.telpsuplier,
+
+        Connection.query("SELECT * FROM produk WHERE id='"+fid+"'", (e, r)=>{
+            if (e) {
+
+                return res.status(500).send({
+                    status: false,
+                    message: 'Internal Server Error !!!',
+                })	
             }
-        }
-
-        airminum.push(tempAirminum)
-
-        res.send({status: true, data: airminum})
+            // Jika data tidak ditemukan
+            if (r.length > 0) {
+                return res.status(400).send({
+                    status: false,
+                    message: 'Data Produk sudah Ada!!!'
+                })
+            }else{
+                Connection.query("INSERT INTO produk VALUES('"+fid
+                +"', '"+fcategory+"', '"+fproduk+"', '"+fsatuan+"', '"+fharga+"' , '"+fnamasupplier+"', '"+falamatsuplier+"', '"+ftelpsuplier+"')", (e, r)=>{
+            
+                    if (e) {
+                        return res.status(500).send({
+                            status: false,
+                            message: 'Internal Server Error!!!'
+                        })
+                    }
+                    res.status(200).send({
+                        status: true,
+                        message: 'Insert data Sucessfully',
+                        data: {
+                            nip: tnip,
+                            nama: tnama,
+                            alamat: talamat,
+                            hp: thp,
+                            jk: tjk,
+                        },
+                    })
+                })
+            }
+        })
 
     })
 

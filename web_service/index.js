@@ -97,7 +97,7 @@ connection.connect((err)=>{
 		const tnama = req.body.nama
 		const talamat = req.body.alamat
 		const thp = req.body.hp
-		const tjk = req.body.jk ?1:0
+		const tjk = req.body.jk?1:0
 	
 		connection.query("SELECT * FROM employees WHERE nip='"+tnip+"'", (e, r)=>{
 			if (e) {
@@ -138,148 +138,188 @@ connection.connect((err)=>{
 		})
 	})
 
-	// app.post('/api/employees', (req, res) => {
-	// 	// Validation with Joi
-	// 	const schema = Joi.object({
-	// 		nip: Joi.string().min(9).max(10).required(),
-	// 		nama: Joi.string().required(),
-	// 		alamat: Joi.string().required(),
-	// 		hp: Joi.number().required(),
-	// 		jk: Joi.boolean().required()
-	// 	})
-	
-	// 	const { error } = schema.validate({
-	// 		nip: req.body.nip,
-	// 		nama: req.body.nama,
-	// 		alamat: req.body.alamat,
-	// 		hp: req.body.hp,
-	// 		jk: req.body.jk
-	// 	})
-	
-	// 	if (error) {
-	// 		return res
-	// 			.status(400)
-	// 			.send({ status: false, message: error.details[0].message })
-	// 	}
-	
-	// 	// Check if data with the given NIP already exists
-	// 	const existingNIP = req.body.nip;
-	// 	connection.query("SELECT * FROM employees WHERE nip = ?", [existingNIP], (selectError, selectResults) => {
-	// 		if (selectError) {
-	// 			return res.status(500).send({
-	// 				status: false,
-	// 				message: 'Internal Server Error!!!'
-	// 			});
-	// 		}
-	
-	// 		if (selectResults.length > 0) {
-	// 			// Data with the given NIP already exists
-	// 			return res.status(400).send({
-	// 				status: false,
-	// 				message: 'NIP already exists in the employees table.'
-	// 			});
-	// 		}
-	
-	// 		// If the NIP is unique, proceed with the insertion
-	// 		const tnip = req.body.nip;
-	// 		const tnama = req.body.nama;
-	// 		const talamat = req.body.alamat;
-	// 		const thp = req.body.hp;
-	// 		const tjk = req.body.jk ? 1 : 0;
-	
-	// 		connection.query("INSERT INTO employees VALUES('"+tnip+"', '"+tnama+"', '"+talamat+"', '"+thp+"', '"+tjk+"')", [tnip, tnama, talamat, thp, tjk], (insertError, insertResults) => {
-	// 			if (insertError) {
-	// 				return res.status(500).send({
-	// 					status: false,
-	// 					message: 'Internal Server Error!!!'
-	// 				});
-	// 			}
-	
-	// 			res.status(200).send({
-	// 				status: true,
-	// 				message: 'Insert data successfully',
-	// 				data: {
-	// 					nip: tnip,
-	// 					nama: tnama,
-	// 					alamat: talamat,
-	// 					hp: thp,
-	// 					jk: tjk,
-	// 				},
-	// 			});
-	// 		});
-	// 	});
-	// });
-	
 
 
 	// ***** Update Data dengan Validasi menggunakan JOI *****
-	app.put('/api/employees/:nip', (req, res)=>{
-		//searching by id 
-		const employeeNip = req.params.nip;
-		const employee = employees.find(e=> e.nip === employeeNip)
+	// app.put('/api/employees/:nip', (req, res)=>{
+	// 	//searching by id 
+	// 	const anip = req.params.nip;
+		
+	// 	connection.query("SELECT * FROM employees WHERE nip='"+anip+"'", (e, r)=>{
+	// 		if (r.length > 0) {
+	// 			// If data found
+	// 			const schema = Joi.object({
+	// 				nama: Joi.string().required(),
+	// 				alamat: Joi.string().required(),
+	// 				hp: Joi.number().required(),
+	// 				jk: Joi.boolean().required()
+	// 			})
 
-		//result => not found
-		if(!employee){
-			return res
-				.status(404)
-				.send({status:false, message: 'Employee NIP Not Found.'})
-		}
+	// 			// untuk validasi
+	// 			const {error} = schema.validate({	
+	// 				nama: req.body.nama,
+	// 				alamat: req.body.alamat,
+	// 				hp: req.body.hp,
+	// 				jk: req.body.jk
+	// 			})
 
-		// SchemaUpdate untuk validasi
-		const schemaUpdate = Joi.object({
-			nama: Joi.string().required(),
-			alamat: Joi.string().required(),
-			hp: Joi.number().required(),
-			jk: Joi.boolean().required()
-		})
+				
+	// 			// Jika validasi bermasalah
+	// 			if (error) {
+	// 				return res
+	// 						.status(400)
+	// 						.send({status:false, message: error.details[0].message})
+	// 			}
+	// 			aNama = req.body.nama
+	// 			aAlamat = req.body.alamat
+	// 			aHp = req.body.hp
+	// 			aJk = req.body.jk
 
-		const {error} = schemaUpdate.validate({	
-			nama: req.body.nama,
-			alamat: req.body.alamat,
-			hp: req.body.hp,
-			jk: req.body.jk
+	// 			connection.query(
+	// 				"UPDATE employees SET nama='"+aNama+"', alamat='"+aAlamat+"', hp='"+aHp+"', jk='"+aJk+"' WHERE nip='"+anip+"'",
+	// 				(e, r)=>{
+	// 					if (e) {
+	// 						return res.status(500).send(
+	// 							{
+	// 								status:false,
+	// 								message: 'Internal Server Error',
+	// 							}
+	// 						)
+	// 					}
+
+	// 					res.status(200).send(
+	// 						{
+	// 							status:true,
+	// 							message: 'Update Employee Successfully',
+	// 						}
+	// 					)
+	// 				})
+	// 		}else{
+
+	// 			// If data not found
+	// 			res.status(404).send(
+	// 				{
+	// 					status: false,
+	// 					message: 'Employee Nip not found.'
+	// 				}
+	// 			)
+	// 		}
+	// 	})
+
+
+	// 	//result => found -> update data
+	
+
+	// 	res.send({status:true, message: 'Employee Update Succesfully.'})
+	// })
+
+
+
+
+
+
+	app.put("/api/employees/:nip", (req, res) => {
+
+		const anip = req.params.nip
+	  
+		connection.query("Select * From Employees Where nip='"+anip+"'",(e, r)=>{
+		  if (r.length > 0){
+			const schema = Joi.object({
+			  nama: Joi.string().required(),
+			  alamat: Joi.string().required(),
+			  hp: Joi.number().required(),
+			  jk: Joi.boolean().required()
+		  })
+	  
+			const { error } = schema.validate({
+			  nama: req.body.nama,
+			  alamat: req.body.alamat,
+			  hp: req.body.hp,
+			  jk: req.body.jk
+			 });
+	  
+			 if(error) {
+			  return res
+				.status(400)
+				.send({ststus:false, message: error.details[0].message})
+			 }
+	  
+			 anama = req.body.nama
+			 aalamat = req.body.alamat
+			 aHp = req.body.hp
+			 ajk = req.body.jk?1:0
+	  
+			 connection.query("UPDATE employees Set nama='"+anama+"', alamat='"+aalamat+"', hp='"+aHp+"', jk='"+ajk+"' WHERE nip='"+anip+"'",
+			 (e, r)=>{
+
+				if(e){
+					
+					return res.status(500).send({status: false, message: e})
+				}
+	  
+				res.status(200).send({status: true, message: 'Updated Employee Successfully.'})
+			 })
+	  
+	  
+		  }else(
+			res.status(404).send({ststus: false, message: 'Employee Nip Not Found'})
+		  )
 		})
 		
-		if (error) {
-			return res
-					.status(400)
-					.send({status:false, message: error.details[0].message})
-		}
-
-		//result => found -> update data
-		employee.nama = req.body.nama
-		employee.alamat = req.body.alamat
-		employee.hp = req.body.hp
-		employee.jk = req.body.jk
-
-		res.send({status:true, message: 'Employee Update Succesfully.'})
-	})
+	  });
 
 	// Untuk Menghapus Data
 	app.delete('/api/employees/:nip', (req, res) => {
 		// Menemukan karyawan berdasarkan NIP
-		const employeeNip = req.params.nip;
-		const index = employees.findIndex(e => e.nip === employeeNip);
+		const aNip = req.params.nip
 
-		// Jika karyawan tidak ditemukan
-		if (index === -1) {
-			return res.status(404).send({
-				status: false,
-				message: 'Employee NIP Not Found.'
-			});
-		}
+		connection.query("DELETE FROM employees WHERE nip ='"+aNip+"'" ,(e,r)=>{
 
-		// Menghapus karyawan dari array
+			if (e) {
+				return res.status(500).send(
+					{
+						status: false,
+						message: 'Internal Server Error',
+					}
+				)
+			}
 
-		// splice ini untuk menghapus atau menambah data
-		employees.splice(index, 1);
-		
-		res.send({
-			status: true,
-			message: 'Employee Deleted Successfully.',
-			data: employees
-		});
+			res.status(200).send(
+				{
+					status:true,
+					message: 'Delete Employee Succesfull',
+				}
+			)
+		})
 	});
+
+
+	// app.delete('/api/employees/:nip', (req, res) => {
+	// 	// Menemukan karyawan berdasarkan NIP
+	// 	const employeeNip = req.params.nip;
+	// 	const index = employees.findIndex(e => e.nip === employeeNip);
+
+	// 	// Jika karyawan tidak ditemukan
+	// 	if (index === -1) {
+	// 		return res.status(404).send({
+	// 			status: false,
+	// 			message: 'Employee NIP Not Found.'
+	// 		});
+	// 	}
+
+	// 	// Menghapus karyawan dari array
+
+	// 	// splice ini untuk menghapus atau menambah data
+	// 	employees.splice(index, 1);
+		
+	// 	res.send({
+	// 		status: true,
+	// 		message: 'Employee Deleted Successfully.',
+	// 		data: employees
+	// 	});
+	// });
+
+
 
 
 // port = process.env.port || 8080
