@@ -1,13 +1,14 @@
 //ini format untuk memanggil depedency yang mau digunakan
 const express = require('express')
-const Connection = require('./database')
 const Joi = require('joi')
 
+const Connection = require('./database')
+const auth = require('./auth')
 
 const router = express.Router()
 
 	// ***** untuk mengambil semua Data didalam Database *****
-	router.get('/', (req, res)=>{
+	router.get('/', auth, (req, res)=>{
 		Connection.query('SELECT * FROM employees', (e, r)=>{
 			if (e) {
 				return res.status(500).send({
@@ -23,7 +24,7 @@ const router = express.Router()
 	})
 
 	// ***** untuk mengambil parameter tertentu dengan nip *****
-	router.get('/:nip', (req, res)=>{
+	router.get('/:nip', auth, (req, res)=>{
 		const employeeNip = req.params.nip
 
 		Connection.query("SELECT * FROM employees WHERE nip='"+employeeNip+"'", (e, r)=>{
@@ -52,7 +53,7 @@ const router = express.Router()
 
 
 	// ***** Untuk Post data / Kirim data *****
-	router.post('/', (req, res ) =>{
+	router.post('/', auth, (req, res ) =>{
 		//validasi dengan joi
 		const schema = Joi.object({
 			nip: Joi.string().min(9).max(10).required(),
@@ -123,7 +124,7 @@ const router = express.Router()
 	})
 
 
-	router.put("/:nip", (req, res) => {
+	router.put("/:nip", auth, (req, res) => {
 
 		const anip = req.params.nip
 	  
@@ -174,7 +175,7 @@ const router = express.Router()
 	  });
 
 	// Untuk Menghapus Data
-	router.delete('/:nip', (req, res) => {
+	router.delete('/:nip', auth, (req, res) => {
 		// Menemukan karyawan berdasarkan NIP
 		const aNip = req.params.nip
 
